@@ -1,5 +1,5 @@
-from app.utils.auth_utils import hash_password, verify_password, create_access_token
-from app.repositories.repositories import UserRepository
+from app.utils.auth_utils import generate_token, hash_password, verify_password, create_access_token
+from app.repositories.user_repo import UserRepository
 
 
 class AuthService:
@@ -19,5 +19,5 @@ class AuthService:
             raise ValueError("Invalid credentials")
         if not verify_password(password, user.password):
             raise ValueError("Invalid credentials")
-        token = create_access_token(user.id, user.role)
-        return token, user
+        access_token, refresh_token = generate_token(user.id, user.role)
+        return access_token, refresh_token, user

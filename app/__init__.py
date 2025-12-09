@@ -4,11 +4,15 @@ from app.config.db import db,ma
 from app.config.config import Config
 from app.auth.auth_routes import auth_bp
 from app.admin.admin_routes import admin_bp
-from dotenv import load_dotenv
 
-load_dotenv()
 
 def create_app():
+    from dotenv import load_dotenv
+    from pathlib import Path
+
+    env_path = Path(__file__).resolve().parent.parent / ".env"
+    load_dotenv(dotenv_path=env_path)
+
     app = Flask(__name__)
 
     app.config.from_object(Config)

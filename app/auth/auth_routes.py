@@ -39,15 +39,19 @@ def login():
         data = login_schema.load(request.get_json() or {})
     except ValidationError as err:
         return jsonify({"errors": err.messages}), 400
-    data = request.get_json()
 
-    email = data.get("email")
-    password = data.get("password")
+    email = data["email"]
+    password = data["password"]
 
     try:
-        token, user = AuthService.login_user(email, password)
-        return {"access_token": token, "role": user.role}
+        access_token, refresh_token, user = AuthService.login_user(email, password)
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "role": user.role
+        }, 200
     except ValueError as e:
         return {"message": str(e)}, 401
+
 
 

@@ -15,22 +15,26 @@ class User(db.Model):
     role = db.Column(db.String(20), nullable=False, default=RoleEnum.MEMBER.value)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    doctor_profile = db.relationship("DoctorProfile", back_populates="user", uselist=False)
-
 class Department(db.Model):
     __tablename__ = "departments"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
     description = db.Column(db.String(500), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    doctors = db.relationship("Doctor", back_populates="department")
 
-class DoctorProfile(db.Model):
-    __tablename__ = "doctor_profiles"
+
+class Doctor(db.Model):
+    __tablename__ = "doctors"
+
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, unique=True)
-    department_id = db.Column(db.Integer, db.ForeignKey("departments.id"), nullable=True)
-    qualifications = db.Column(db.String(500), nullable=True)
-    bio = db.Column(db.String(1000), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    name = db.Column(db.String(120), nullable=False)
+    specialization = db.Column(db.String(120))
+    experience_years = db.Column(db.Integer)
 
-    user = db.relationship("User", back_populates="doctor_profile")
-    department = db.relationship("Department")
+    department_id = db.Column(db.Integer, db.ForeignKey("departments.id"), nullable=True)
+    department = db.relationship("Department", back_populates="doctors")
+
+    user = db.relationship("User")
+
