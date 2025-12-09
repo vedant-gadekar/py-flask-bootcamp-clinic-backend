@@ -37,6 +37,10 @@ class AdminService:
         doctor = DoctorRepository.get_by_id(doctor_id)
         if not doctor:
             raise ValueError("Doctor not found")
+        
+        department = DepartmentRepository.get_by_id(department_id)
+        if not department:
+            raise ValueError("Department not found")
 
         assigned = DoctorRepository.assign_department(doctor, department_id)
         return assigned
@@ -44,3 +48,5 @@ class AdminService:
     @staticmethod
     def list_doctors():
         return DoctorRepository.list_all()
+    
+

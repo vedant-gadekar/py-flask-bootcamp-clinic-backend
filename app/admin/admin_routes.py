@@ -68,3 +68,24 @@ def onboard_doctor():
 def list_doctors():
     doctors = AdminService.list_doctors()
     return doctor_schema.dump(doctors, many=True), 200
+
+@admin_bp.route("/doctors/assign-department", methods=["POST"])
+@requires_role("admin")
+def assign_doctor_to_department():
+    try:
+        data = request.get_json() or {}
+        doctor_id = data.get("doctor_id")
+        department_id = data.get("department_id")
+
+        if not doctor_id or not department_id:
+            return jsonify({"message": "doctor_id and department_id are required"}), 400
+
+        doctor = AdminService.assign_doctor_to_department(doctor_id, department_id)
+
+        return doctor_schema.dump(doctor), 200
+
+    except ValueError as e:
+        return jsonify({"message": str(e)}), 400
+
+    except SQLAlchemyError:
+        return jsonify({"message": "Something went wrong"}), 500
