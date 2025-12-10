@@ -2,7 +2,6 @@ from app.config.database import db
 from datetime import datetime
 
 
-
 class Department(db.Model):
     __tablename__ = "departments"
     id = db.Column(db.Integer, primary_key=True)

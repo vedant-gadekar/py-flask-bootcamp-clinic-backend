@@ -19,3 +19,8 @@ class DoctorSchema(ma.SQLAlchemyAutoSchema):
 
     def get_email(self, obj):
         return obj.user.email if obj.user else None
+
+
+class AssignDoctorDepartmentSchema(ma.Schema):
+    doctor_id = fields.Int(required=True)
+    department_id = fields.Int(required=True)

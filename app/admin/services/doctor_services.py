@@ -11,7 +11,7 @@ class DoctorService:
             if existing.role == "doctor":
                 raise ValueError("Doctor already onboarded")
 
-            if existing.role == "member":
+            if existing.role == "member" or existing.role == "admin":
                 UserRepository.update_role(existing.id, "doctor")
                 doctor = DoctorRepository.create_doctor(
                     user_id=existing.id,
