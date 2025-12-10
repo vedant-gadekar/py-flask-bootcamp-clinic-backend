@@ -16,6 +16,18 @@ class AdminService:
     def onboard_doctor(name, email, password,specialization=None, experience_years=None):
         existing = UserRepository.get_by_email(email)
         if existing:
+            if existing.role == "doctor":
+                raise ValueError("Doctor already onboarded")
+
+            if existing.role == "member":
+                UserRepository.update_role(existing.id, "doctor")
+                doctor = DoctorRepository.create_doctor(
+                    user_id=existing.id,
+                    name=name,
+                    specialization=specialization,
+                    experience_years=experience_years,
+                )
+                return doctor
             raise ValueError("Email already registered")
 
         user = UserRepository.create_user(

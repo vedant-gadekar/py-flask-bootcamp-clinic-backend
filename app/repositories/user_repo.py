@@ -16,6 +16,17 @@ class UserRepository:
     @staticmethod
     def get_by_id(user_id: int):
         return db.session.get(User, user_id)
+    
+    @staticmethod
+    def update_role(user_id: int, new_role: str):
+        user = User.query.get(user_id)
+        if not user:
+            raise ValueError("User not found")
+
+        user.role = new_role
+        db.session.commit()
+        return user
+
 
 
 
