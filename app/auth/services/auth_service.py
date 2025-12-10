@@ -1,5 +1,6 @@
-from app.utils.auth_utils import generate_token, hash_password, verify_password, create_access_token
-from app.repositories.user_repo import UserRepository
+from app.common.utils.jwt_handler import generate_token
+from app.common.utils.password_hash import hash_password, verify_password
+from app.common.repository.user_repo import UserRepository
 
 
 class AuthService:

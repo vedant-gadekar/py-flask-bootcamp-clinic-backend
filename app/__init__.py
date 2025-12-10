@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_jwt_extended import JWTManager
-from app.config.db import db,ma
+from app.config.database import db,ma
 from app.config.config import Config
 from app.auth.auth_routes import auth_bp
 from app.admin.admin_routes import admin_bp

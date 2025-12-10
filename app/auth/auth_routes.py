@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify
-from app.utils.schemas import LoginSchema, UserSchema, RegisterSchema
-from app.services.auth_service import AuthService
+from app.auth.schemas.login_schema import LoginSchema 
+from app.auth.schemas.register_schema import RegisterSchema
+from app.auth.services.auth_service import AuthService
+from app.common.schemas.user_schema import UserSchema
 from marshmallow import ValidationError
 
 auth_bp = Blueprint("auth", __name__)

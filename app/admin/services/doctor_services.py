@@ -1,17 +1,9 @@
-from app.repositories.department_repo import DepartmentRepository
-from app.repositories.user_repo import UserRepository
-from app.repositories.doctor_repo import DoctorRepository
-from app.utils.auth_utils import hash_password
+from app.admin.repository.department_repo import DepartmentRepository
+from app.common.repository.user_repo import UserRepository
+from app.admin.repository.doctor_repo import DoctorRepository
+from app.common.utils.password_hash import hash_password
 
-class AdminService:
-    @staticmethod
-    def create_department(name, description):
-        return DepartmentRepository.create(name, description)
-
-    @staticmethod
-    def list_departments():
-        return DepartmentRepository.list_all()
-    
+class DoctorService:
     @staticmethod
     def onboard_doctor(name, email, password,specialization=None, experience_years=None):
         existing = UserRepository.get_by_email(email)
@@ -60,5 +52,3 @@ class AdminService:
     @staticmethod
     def list_doctors():
         return DoctorRepository.list_all()
-    
-

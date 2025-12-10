@@ -1,5 +1,5 @@
-from app.models.models import Doctor
-from app.config.db import db
+from app.admin.models.doctor import Doctor
+from app.config.database import db
 
 
 class DoctorRepository:

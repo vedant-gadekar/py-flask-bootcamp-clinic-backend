@@ -1,7 +1,9 @@
 from flask import Blueprint, request, jsonify, g
-from app.services.admin_service import AdminService
-from app.utils.auth_utils import requires_role
-from app.utils.schemas import DepartmentSchema, DoctorSchema, OnboardDoctorSchema
+from app.admin.services.department_services import DepartmentService
+from app.admin.services.doctor_services import DoctorService
+from app.common.utils.rbac_decorator import requires_role
+from app.admin.schemas.department_schema import DepartmentSchema
+from app.admin.schemas.doctor_schema import OnboardDoctorSchema, DoctorSchema 
 from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -23,14 +25,14 @@ def create_department():
     data = request.get_json() or {}
     name = data.get("name")
     description = data.get("description")
-    department = AdminService.create_department(name, description)
+    department = DepartmentService.create_department(name, description)
     return {"id": department.id, "name": department.name}, 201
 
 
 @admin_bp.route("/departments", methods=["GET"])
 @requires_role("admin")
 def list_departments():
-    departments = AdminService.list_departments()
+    departments = DepartmentService.list_departments()
     return department_schema.dump(departments), 200
 
 
@@ -46,7 +48,7 @@ def onboard_doctor():
         specialization = data.get("specialization")
         experience_years = data.get("experience_years")
 
-        doctor = AdminService.onboard_doctor(
+        doctor = DoctorService.onboard_doctor(
             name=name,
             email=email,
             password=password,
@@ -66,7 +68,7 @@ def onboard_doctor():
 @admin_bp.route("/doctors", methods=["GET"])
 @requires_role("admin")
 def list_doctors():
-    doctors = AdminService.list_doctors()
+    doctors = DoctorService.list_doctors()
     return doctor_schema.dump(doctors, many=True), 200
 
 @admin_bp.route("/doctors/assign-department", methods=["POST"])
@@ -80,7 +82,7 @@ def assign_doctor_to_department():
         if not doctor_id or not department_id:
             return jsonify({"message": "doctor_id and department_id are required"}), 400
 
-        doctor = AdminService.assign_doctor_to_department(doctor_id, department_id)
+        doctor = DoctorService.assign_doctor_to_department(doctor_id, department_id)
 
         return doctor_schema.dump(doctor), 200
 

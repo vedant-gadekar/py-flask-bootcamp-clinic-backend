@@ -1,5 +1,5 @@
-from app.models.models import  Department
-from app.config.db import db
+from app.admin.models.department import  Department
+from app.config.database import db
 
 class DepartmentRepository:
     @staticmethod
