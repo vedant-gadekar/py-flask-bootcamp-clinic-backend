@@ -10,7 +10,7 @@ class AppointmentSchema(ma.SQLAlchemyAutoSchema):
         load_instance = False
 
     id = fields.Integer(dump_only=True)
-    doctor_id = fields.Integer(dump_only=True)
+    doctor_id = fields.Integer(required=True)
     member_id = fields.Integer(dump_only=True)
     start_time = fields.Integer()
     end_time = fields.Integer()

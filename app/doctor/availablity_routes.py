@@ -11,15 +11,24 @@ availability_bp = Blueprint("availability_bp", __name__)
 @requires_role("doctor")
 def add_availability():
     
-    data = AvailabilitySchema().load(request.get_json())
+    try:
+        data = AvailabilitySchema().load(request.get_json())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
 
     start = data["start_time"]
     end = data["end_time"]
-
     doctor_id = get_jwt_identity()
 
-    slot = AvailabilityService.add_availability(doctor_id, start, end)
-    return jsonify({"message": "Availability added", "id": slot.id}), 201
+    try:
+        slot = AvailabilityService.add_availability(doctor_id, start, end)
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400
+
+
+    return AvailabilitySchema().jsonify(slot), 201
+
 
 
 
@@ -28,6 +37,6 @@ def add_availability():
 def list_availability():
     doctor_id = get_jwt_identity()
 
-    schema=AvailabilitySchema(many=True)
+    availability_schema=AvailabilitySchema(many=True)
     slots = AvailabilityService.list_availability(doctor_id)
-    return jsonify(schema.dump(slots)), 200
+    return jsonify(availability_schema.dump(slots)), 200

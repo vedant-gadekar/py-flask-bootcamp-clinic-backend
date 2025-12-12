@@ -10,28 +10,33 @@ appointment_bp = Blueprint("appointment_bp", __name__)
 @requires_role("member")
 def book_appointment():
     raw_data = request.get_json()
-    data=AppointmentSchema().load(raw_data)
+    try:
+        data = AppointmentSchema().load(raw_data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
     
     member_id = get_jwt_identity()
     doctor_id = data["doctor_id"]
     start = data["start_time"]
     end = data["end_time"]
-
-    appt = AppointmentService.book(member_id, doctor_id, start, end)
-    return jsonify({
-        "message": "Appointment booked",
-        "id": appt.id,
-        "doctor_id": doctor_id,
-        "start_time": start,
-        "end_time": end
-    }), 201
+    try:
+        appt = AppointmentService.book(member_id, doctor_id, start, end)
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400
+     
+    return AppointmentSchema(many=True).jsonify([appt]), 201
+        
 
 
 @appointment_bp.route("/my", methods=["GET"])
 @requires_role("member")
 def my_appointments():
     member_id = get_jwt_identity()
-    appts = AppointmentService.member_appointments(member_id)
+    try:
+        appts = AppointmentService.member_appointments(member_id)
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400
+
     return AppointmentSchema(many=True).jsonify(appts), 200
 
 
@@ -39,13 +44,20 @@ def my_appointments():
 @requires_role("doctor")
 def doctor_appointments():
     doctor_id = get_jwt_identity()
-    appts = AppointmentService.doctor_appointments(doctor_id)
+    try:
+        appts = AppointmentService.doctor_appointments(doctor_id)
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400
+
     return AppointmentSchema(many=True).jsonify(appts),200
 
 
 @appointment_bp.route("/admin", methods=["GET"])
 @requires_role("admin")
 def admin_appointments():
-    appts = AppointmentService.admin_all_appointments()
+    try:
+        appts = AppointmentService.admin_all_appointments()
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400
     return AppointmentSchema(many=True).jsonify(appts), 200
 
