@@ -1,4 +1,4 @@
-from app.doctor.models.doctor_availability import DoctorAvailability
+from app.doctor_availability.models.doctor_availability import DoctorAvailability
 from app.config.database import db
 
 class AvailabilityRepository:

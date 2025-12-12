@@ -4,8 +4,9 @@ from app.config.database import db,ma
 from app.config.config import Config
 from app.auth.auth_routes import auth_bp
 from app.admin.admin_routes import admin_bp
-from app.doctor.availablity_routes import availability_bp
+from app.doctor_availability.availablity_routes import availability_bp
 from app.appointment.appointment_routes import appointment_bp
+from app.reimbursement.reimbursement_routes import reimbursement_bp
 
 
 def create_app():
@@ -31,6 +32,7 @@ def create_app():
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(availability_bp, url_prefix='/availability')
     app.register_blueprint(appointment_bp, url_prefix='/appointments')
+    app.register_blueprint(reimbursement_bp, url_prefix='/reimbursements')
 
     @app.route('/health', methods=['GET'])
     def health_check():

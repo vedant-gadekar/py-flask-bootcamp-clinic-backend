@@ -1,5 +1,5 @@
 from datetime import datetime
-from app.doctor.repository.availability_repo import AvailabilityRepository
+from app.doctor_availability.repository.availability_repo import AvailabilityRepository
 from werkzeug.exceptions import BadRequest
 
 class AvailabilityService:

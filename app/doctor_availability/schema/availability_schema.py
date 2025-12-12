@@ -1,5 +1,5 @@
 from app.config.database import ma
-from app.doctor.models.doctor_availability import DoctorAvailability
+from app.doctor_availability.models.doctor_availability import DoctorAvailability
 from marshmallow import validates, fields
 
 

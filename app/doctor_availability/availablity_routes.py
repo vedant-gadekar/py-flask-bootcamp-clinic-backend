@@ -2,8 +2,8 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.common.models.user import RoleEnum
 from app.common.utils.rbac_decorator import requires_role
-from app.doctor.services.availablity_service import AvailabilityService
-from app.doctor.schema.availability_schema import AvailabilitySchema
+from app.doctor_availability.services.availablity_service import AvailabilityService
+from app.doctor_availability.schema.availability_schema import AvailabilitySchema
 from datetime import datetime
 
 availability_bp = Blueprint("availability_bp", __name__)

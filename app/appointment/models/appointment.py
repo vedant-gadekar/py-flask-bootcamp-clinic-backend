@@ -1,6 +1,11 @@
 from app.config.database import db
 from datetime import datetime
+from enum import Enum
 
+class AppointmentStatusEnum(str, Enum):
+    SCHEDULED = "Scheduled"
+    COMPLETED = "Completed"
+    CANCELED = "Canceled"
 
 class Appointment(db.Model):
     __tablename__ = "appointments"
@@ -8,6 +13,7 @@ class Appointment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     doctor_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     member_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    status = db.Column(db.String(20), default=AppointmentStatusEnum.SCHEDULED)
 
     start_time = db.Column(db.Integer, nullable=False)
     end_time = db.Column(db.Integer, nullable=False)

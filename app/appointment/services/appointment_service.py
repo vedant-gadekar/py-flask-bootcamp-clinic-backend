@@ -1,4 +1,4 @@
-from app.doctor.repository.availability_repo import AvailabilityRepository
+from app.doctor_availability.repository.availability_repo import AvailabilityRepository
 from app.appointment.repository.appointment_repo import AppointmentRepository
 
 class AppointmentService:
