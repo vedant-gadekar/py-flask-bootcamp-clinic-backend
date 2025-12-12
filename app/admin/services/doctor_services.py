@@ -1,4 +1,5 @@
 from app.admin.repository.department_repo import DepartmentRepository
+from app.common.models.user import RoleEnum
 from app.common.repository.user_repo import UserRepository
 from app.admin.repository.doctor_repo import DoctorRepository
 from app.common.utils.password_hash import hash_password
@@ -8,11 +9,11 @@ class DoctorService:
     def onboard_doctor(name, email, password,specialization=None, experience_years=None):
         existing = UserRepository.get_by_email(email)
         if existing:
-            if existing.role == "doctor":
+            if existing.role ==RoleEnum.DOCTOR:
                 raise ValueError("Doctor already onboarded")
 
-            if existing.role == "member" or existing.role == "admin":
-                UserRepository.update_role(existing.id, "doctor")
+            if existing.role == RoleEnum.MEMBER or existing.role == RoleEnum.ADMIN:
+                UserRepository.update_role(existing.id, RoleEnum.DOCTOR)
                 doctor = DoctorRepository.create_doctor(
                     user_id=existing.id,
                     name=name,
@@ -25,7 +26,7 @@ class DoctorService:
         user = UserRepository.create_user(
             email=email,
             password=hash_password(password),
-            role="doctor"
+            role=RoleEnum.DOCTOR
         )
 
         doctor = DoctorRepository.create_doctor(

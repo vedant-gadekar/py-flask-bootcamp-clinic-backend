@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from app.auth.schemas.login_schema import LoginSchema 
 from app.auth.schemas.register_schema import RegisterSchema
 from app.auth.services.auth_service import AuthService
+from app.common.models.user import RoleEnum
 from app.common.schemas.user_schema import UserSchema
 from marshmallow import ValidationError
 
@@ -26,7 +27,7 @@ def register():
         user = AuthService.register_user(
             email=data["email"], 
             password=data["password"],
-            role=data.get("role", "member")
+            role=data.get("role", RoleEnum.MEMBER)
             )
         return user_schema.dump(user), 201
     except ValueError as e:

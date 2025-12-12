@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, g
 from app.admin.services.department_services import DepartmentService
 from app.admin.services.doctor_services import DoctorService
+from app.common.models.user import RoleEnum
 from app.common.utils.rbac_decorator import requires_role
 from app.admin.schemas.department_schema import DepartmentSchema
 from app.admin.schemas.doctor_schema import OnboardDoctorSchema, DoctorSchema , AssignDoctorDepartmentSchema
@@ -16,13 +17,13 @@ onboard_doctor_schema = OnboardDoctorSchema()
 assign_department_schema = AssignDoctorDepartmentSchema()
 doctor_schema = DoctorSchema()
 
-@requires_role("admin")
+@requires_role(RoleEnum.ADMIN)
 @admin_bp.get("/")
 def admin_root():
     return {"message": "admin works"}
 
 @admin_bp.route("/departments", methods=["POST"])
-@requires_role("admin")
+@requires_role(RoleEnum.ADMIN)
 def create_department():
     try:
         data = department_schema_single.load(request.get_json() or {})
@@ -38,14 +39,14 @@ def create_department():
 
 
 @admin_bp.route("/departments", methods=["GET"])
-@requires_role("admin")
+@requires_role(RoleEnum.ADMIN)
 def list_departments():
     departments = DepartmentService.list_departments()
     return department_schema_many.dump(departments), 200
 
 
 @admin_bp.route("/doctors", methods=["POST"])
-@requires_role("admin")
+@requires_role(RoleEnum.ADMIN)
 def onboard_doctor():
     try:
         data = onboard_doctor_schema.load(request.get_json())
@@ -68,13 +69,13 @@ def onboard_doctor():
         return jsonify({"message": "Something went wrong"}), 500
 
 @admin_bp.route("/doctors", methods=["GET"])
-@requires_role("admin")
+@requires_role(RoleEnum.ADMIN)
 def list_doctors():
     doctors = DoctorService.list_doctors()
     return doctor_schema.dump(doctors, many=True), 200
 
 @admin_bp.route("/doctors/assign-department", methods=["POST"])
-@requires_role("admin")
+@requires_role(RoleEnum.ADMIN)
 def assign_doctor_to_department():
     try:
         data = assign_department_schema.load(request.get_json() or {})
