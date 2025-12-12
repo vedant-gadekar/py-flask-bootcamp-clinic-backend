@@ -3,11 +3,12 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.common.utils.rbac_decorator import requires_role
 from app.appointment.services.appointment_service import AppointmentService
 from app.appointment.schemas.appointment_schema import AppointmentSchema
+from app.common.models.user import RoleEnum
 
 appointment_bp = Blueprint("appointment_bp", __name__)
 
 @appointment_bp.route("/book", methods=["POST"])
-@requires_role("member")
+@requires_role(RoleEnum.MEMBER)
 def book_appointment():
     raw_data = request.get_json()
     try:
@@ -29,7 +30,7 @@ def book_appointment():
 
 
 @appointment_bp.route("/my", methods=["GET"])
-@requires_role("member")
+@requires_role(RoleEnum.MEMBER)
 def my_appointments():
     member_id = get_jwt_identity()
     try:
@@ -41,7 +42,7 @@ def my_appointments():
 
 
 @appointment_bp.route("/doctor", methods=["GET"])
-@requires_role("doctor")
+@requires_role(RoleEnum.DOCTOR)
 def doctor_appointments():
     doctor_id = get_jwt_identity()
     try:
@@ -53,7 +54,7 @@ def doctor_appointments():
 
 
 @appointment_bp.route("/admin", methods=["GET"])
-@requires_role("admin")
+@requires_role(RoleEnum.ADMIN)
 def admin_appointments():
     try:
         appts = AppointmentService.admin_all_appointments()
