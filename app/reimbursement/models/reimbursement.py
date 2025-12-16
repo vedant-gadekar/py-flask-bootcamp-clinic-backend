@@ -1,14 +1,11 @@
 import enum
 from datetime import datetime
-
 from app.config.database import db
-
 
 class ClaimStatus(enum.Enum):
     PENDING = "PENDING"
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
-
 
 class Reimbursement(db.Model):
     __tablename__ = "reimbursements"

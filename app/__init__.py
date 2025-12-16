@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()  
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from app.config.database import db,ma
@@ -10,23 +12,10 @@ from app.reimbursement.reimbursement_routes import reimbursement_bp
 
 
 def create_app():
-    from dotenv import load_dotenv
-    from pathlib import Path
-    import os
-
-    env_path = Path(__file__).resolve().parent.parent / ".env"
-    load_dotenv(dotenv_path=env_path)
+    
 
     app = Flask(__name__)
-
-    # ✅ SET CONFIG EXPLICITLY
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
-    app.config["JWT_ALGORITHM"] = os.getenv("JWT_ALGORITHM", "HS256")
-    app.config["JWT_EXP_SECONDS"] = int(os.getenv("JWT_EXP_SECONDS", 86400))
-    
+    app.config.from_object(Config)
 
     db.init_app(app)
     ma.init_app(app)
@@ -42,3 +31,4 @@ def create_app():
     app.register_blueprint(reimbursement_bp, url_prefix="/reimbursement")
 
     return app
+

@@ -38,7 +38,6 @@ def submit_claim():
         return jsonify({"error": "Database error while submitting claim"}), 500
 
 
-# Admin reviews claim
 @reimbursement_bp.route("/review/<int:claim_id>", methods=["PUT"])
 @requires_role("admin")
 def review_claim(claim_id):
@@ -57,7 +56,6 @@ def review_claim(claim_id):
     return ReimbursementResponseSchema().dump(claim), 200
 
 
-# Admin views all claims
 @reimbursement_bp.route("/get_all_reimbursement", methods=["GET"])
 @requires_role("admin")
 def get_all_claims():

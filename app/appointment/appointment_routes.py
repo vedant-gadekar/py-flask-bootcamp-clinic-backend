@@ -67,7 +67,6 @@ def admin_appointments():
 def cancel_appointment():
     member_id = int(get_jwt_identity())
     data = request.get_json() or {}
-    print("JWT member_id:", member_id, type(member_id))
     
     appointment_id = data.get("appointment_id")
     if not appointment_id:
