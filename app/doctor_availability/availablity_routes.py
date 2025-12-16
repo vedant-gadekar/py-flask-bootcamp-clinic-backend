@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import get_jwt_identity
 from app.common.models.user import RoleEnum
 from app.common.utils.rbac_decorator import requires_role
 from app.doctor_availability.services.availablity_service import AvailabilityService

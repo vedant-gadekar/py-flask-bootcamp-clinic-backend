@@ -1,27 +1,25 @@
-from app.config.database import db
-from enum import Enum
+import enum
 from datetime import datetime
 
-class StatusEnum(str, Enum):
-    PENDING = "Pending"
-    APPROVED = "Approved"
-    REJECTED = "Rejected"
+from app.config.database import db
+
+
+class ClaimStatus(enum.Enum):
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+
 
 class Reimbursement(db.Model):
     __tablename__ = "reimbursements"
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     member_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    appointment_id = db.Column(db.Integer, db.ForeignKey("appointment.id"), nullable=False)
+    appointment_id = db.Column(db.Integer, db.ForeignKey("appointments.id"), nullable=False)
     amount = db.Column(db.Float, nullable=False)
-    status = db.Column(db.String(20), nullable=False, default=StatusEnum.PENDING)
     description = db.Column(db.String(255), nullable=True)
+    status = db.Column(db.Enum(ClaimStatus), default=ClaimStatus.PENDING, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
+
     member = db.relationship("User", backref="reimbursements")
     appointment = db.relationship("Appointment", backref="reimbursements")
-   
-
-    
-
-    

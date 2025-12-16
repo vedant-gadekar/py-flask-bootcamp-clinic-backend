@@ -1,34 +1,36 @@
-from app.config.database import db
-from app.reimbursement.models.reimbursement import Reimbursement
+from app import db
+from app.reimbursement.models.reimbursement import ClaimStatus, Reimbursement
 
-class ReimbursementRepository:
 
+class ReimbursementRepo:
     @staticmethod
     def create(member_id, appointment_id, amount, description):
-        r = Reimbursement(
+        claim = Reimbursement(
             member_id=member_id,
             appointment_id=appointment_id,
             amount=amount,
             description=description,
-            status="Pending"
         )
-        db.session.add(r)
+        db.session.add(claim)
         db.session.commit()
-        return r
+        return claim
 
     @staticmethod
-    def get_by_member(member_id):
-        return Reimbursement.query.filter_by(member_id=member_id).all()
+    def get_by_id(claim_id):
+        return Reimbursement.query.get(claim_id)
 
     @staticmethod
     def get_all():
         return Reimbursement.query.all()
 
     @staticmethod
-    def update_status(claim_id, status):
-        r = Reimbursement.query.get(claim_id)
-        if not r:
-            return None
-        r.status = status
-        db.session.commit()
-        return r
+    def update_status(claim_id, status: ClaimStatus):
+        claim = Reimbursement.query.get(claim_id)
+        if claim:
+            claim.status = status
+            db.session.commit()
+        return claim
+    
+    @staticmethod
+    def get_by_appointment_id(appointment_id):
+        return Reimbursement.query.filter_by(appointment_id=appointment_id).first()

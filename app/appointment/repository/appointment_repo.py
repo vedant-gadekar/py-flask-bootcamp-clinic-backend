@@ -2,6 +2,10 @@ from app.appointment.models.appointment import Appointment
 from app.config.database import db
 
 class AppointmentRepository:
+    
+    @staticmethod
+    def get_by_id(appointment_id):
+        return Appointment.query.filter_by(id=appointment_id).first()
 
     @staticmethod
     def create(member_id, doctor_id, start, end):
@@ -14,6 +18,12 @@ class AppointmentRepository:
         db.session.add(appt)
         db.session.commit()
         return appt
+    
+    @staticmethod
+    def save(appointment):
+        db.session.add(appointment)
+        db.session.commit()
+        return appointment
 
     @staticmethod
     def get_conflicting_appointment(doctor_id, start, end):

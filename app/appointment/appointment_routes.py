@@ -1,9 +1,10 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import get_jwt_identity
 from app.common.utils.rbac_decorator import requires_role
 from app.appointment.services.appointment_service import AppointmentService
 from app.appointment.schemas.appointment_schema import AppointmentSchema
 from app.common.models.user import RoleEnum
+from app.appointment.models.appointment import Appointment as appointment
 
 appointment_bp = Blueprint("appointment_bp", __name__)
 
@@ -27,7 +28,6 @@ def book_appointment():
      
     return AppointmentSchema(many=True).jsonify([appt]), 201
         
-
 
 @appointment_bp.route("/my", methods=["GET"])
 @requires_role(RoleEnum.MEMBER)
@@ -62,3 +62,23 @@ def admin_appointments():
         return jsonify({"error": str(ve)}), 400
     return AppointmentSchema(many=True).jsonify(appts), 200
 
+@appointment_bp.route("/cancel", methods=["PUT"])
+@requires_role(RoleEnum.MEMBER)
+def cancel_appointment():
+    member_id = int(get_jwt_identity())
+    data = request.get_json() or {}
+    print("JWT member_id:", member_id, type(member_id))
+    
+    appointment_id = data.get("appointment_id")
+    if not appointment_id:
+        return jsonify({"error": "appointment_id is required"}), 400
+
+    try:
+        appt = AppointmentService.cancel_appointment(
+            appointment_id=appointment_id,
+            member_id=member_id
+        )
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400
+
+    return AppointmentSchema().jsonify(appt), 200

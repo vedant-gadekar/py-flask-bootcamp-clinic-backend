@@ -1,5 +1,6 @@
 from app.doctor_availability.repository.availability_repo import AvailabilityRepository
 from app.appointment.repository.appointment_repo import AppointmentRepository
+from app.appointment.models.appointment import AppointmentStatusEnum
 
 class AppointmentService:
 
@@ -58,3 +59,22 @@ class AppointmentService:
     @staticmethod
     def admin_all_appointments():
         return AppointmentRepository.get_all()
+    
+    @staticmethod
+    def cancel_appointment(appointment_id, member_id):
+        appointment = AppointmentRepository.get_by_id(appointment_id)
+        print("appointment id:", appointment_id, type(appointment_id))
+
+        if not appointment:
+            raise ValueError("Appointment not found")
+
+        if appointment.member_id != member_id:
+            raise ValueError("You can cancel only your own appointment")
+
+        if appointment.status == AppointmentStatusEnum.CANCELED.value:
+            raise ValueError("Appointment already canceled")
+
+        appointment.status = AppointmentStatusEnum.CANCELED.value
+
+        return AppointmentRepository.save(appointment)
+

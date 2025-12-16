@@ -1,66 +1,65 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity
+from sqlalchemy.exc import SQLAlchemyError
+
 from app.common.utils.rbac_decorator import requires_role
-from app.reimbursement.schemas.reimbursement_schema import ReimbursementSchema
+from app.reimbursement.schemas.reimbursement_schema import (
+    ReimbursementCreateSchema,
+    ReimbursementResponseSchema,
+)
 from app.reimbursement.services.reimbursement_service import ReimbursementService
 
-reimbursement_bp = Blueprint("reimbursement_bp", __name__)
+reimbursement_bp = Blueprint("reimbursement", __name__, url_prefix="/reimbursement")
 
-@reimbursement_bp.route("", methods=["POST"])
+
+@reimbursement_bp.route("/submit", methods=["POST"])
 @requires_role("member")
 def submit_claim():
-    raw = request.get_json()
-
     try:
-        data = ReimbursementSchema().load(raw)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        data = request.get_json() or {}
+        errors = ReimbursementCreateSchema().validate(data)
+        if errors:
+            return jsonify({"errors": errors}), 400
 
-    member_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
+        try:
+            claim = ReimbursementService.submit_claim(
+                member_id=user_id,
+                appointment_id=data["appointment_id"],
+                amount=data["amount"],
+                description=data.get("description", ""),
+            )
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
 
-    try:
-        claim = ReimbursementService.submit_claim(
-            member_id=member_id,
-            appointment_id=data["appointment_id"],
-            amount=data["amount"],
-            description=data.get("description", "")
-        )
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        return ReimbursementResponseSchema().dump(claim), 201
 
-    return ReimbursementSchema().jsonify(claim), 201
-
-
-@reimbursement_bp.route("/my", methods=["GET"])
-@requires_role("member")
-def my_claims():
-    member_id = get_jwt_identity()
-
-    claims = ReimbursementService.get_member_claims(member_id)
-    return ReimbursementSchema(many=True).jsonify(claims), 200
+    except SQLAlchemyError:
+        return jsonify({"error": "Database error while submitting claim"}), 500
 
 
-@reimbursement_bp.route("/admin", methods=["GET"])
+# Admin reviews claim
+@reimbursement_bp.route("/review/<int:claim_id>", methods=["PUT"])
 @requires_role("admin")
-def admin_get_all_claims():
-    claims = ReimbursementService.get_all_claims()
-    return ReimbursementSchema(many=True).jsonify(claims), 200
-
-
-@reimbursement_bp.route("/admin/approve/<int:claim_id>", methods=["PUT"])
-@requires_role("admin")
-def approve_claim(claim_id):
+def review_claim(claim_id):
     try:
-        claim = ReimbursementService.approve_claim(claim_id)
-        return ReimbursementSchema().jsonify(claim), 200
-    except Exception as e:
+        data = request.get_json() or {}
+        status = data.get("status")
+        if not status:
+            return jsonify({"error": "Status is required"}), 400
+
+        claim = ReimbursementService.review_claim(claim_id, status)
+    except ValueError as e:
         return jsonify({"error": str(e)}), 400
 
-@reimbursement_bp.route("/admin/reject/<int:claim_id>", methods=["PUT"])
+    if not claim:
+        return jsonify({"error": "Claim not found"}), 404
+    return ReimbursementResponseSchema().dump(claim), 200
+
+
+# Admin views all claims
+@reimbursement_bp.route("/get_all_reimbursement", methods=["GET"])
 @requires_role("admin")
-def reject_claim(claim_id):
-    try:
-        claim = ReimbursementService.reject_claim(claim_id)
-        return ReimbursementSchema().jsonify(claim), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
+def get_all_claims():
+    claims = ReimbursementService.get_claims()
+    return ReimbursementResponseSchema(many=True).dump(claims), 200

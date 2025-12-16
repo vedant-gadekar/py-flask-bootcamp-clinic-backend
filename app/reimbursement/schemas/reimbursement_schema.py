@@ -1,18 +1,21 @@
-from app.config.database import ma
-from app.reimbursement.models.reimbursement import Reimbursement
-from marshmallow import fields
+from marshmallow import Schema, fields
+from app.reimbursement.models.reimbursement import ClaimStatus
+from enum import Enum
 
-class ReimbursementSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = Reimbursement
-        include_fk = True
-        load_instance = False
 
-    id = fields.Integer(dump_only=True)
-    member_id = fields.Integer(dump_only=True)
-    status = fields.String(dump_only=True)
-    created_at = fields.DateTime(dump_only=True)
-
-    appointment_id = fields.Integer(required=True)
+class ReimbursementCreateSchema(Schema):
+    appointment_id = fields.Int(required=True)
     amount = fields.Float(required=True)
-    description = fields.String(required=False)
+    description = fields.Str(required=False)
+
+
+class ReimbursementResponseSchema(Schema):
+    id = fields.Int()
+    member_id = fields.Int()
+    appointment_id = fields.Int()
+    amount = fields.Float()
+    description = fields.Str()
+    status = fields.Method("get_status")
+    created_at = fields.DateTime()
+    def get_status(self, obj):
+        return obj.status.value

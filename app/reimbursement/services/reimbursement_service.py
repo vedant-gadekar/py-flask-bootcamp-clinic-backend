@@ -1,47 +1,51 @@
-from werkzeug.exceptions import BadRequest
+from app.reimbursement.repository.reimbursement_repo import ReimbursementRepo
+from app.reimbursement.models.reimbursement import ClaimStatus
 from app.appointment.repository.appointment_repo import AppointmentRepository
-from app.reimbursement.repository.reimbursement_repo import ReimbursementRepository
+
 
 class ReimbursementService:
 
     @staticmethod
     def submit_claim(member_id, appointment_id, amount, description):
-        
-        if amount <= 0:
-            raise BadRequest("Amount must be greater than 0.")
-        
-        appt = AppointmentRepository.get_by_id(appointment_id)
-        
-        if not appt:
-            raise ValueError("Appointment not found.")
 
-        if appt.member_id != member_id:
-            raise ValueError("You cannot claim reimbursement for another member's appointment.")
+        appointment = AppointmentRepository.get_by_id(appointment_id)
+        if not appointment:
+            raise ValueError("Appointment not found")
 
-        if appt.status == "Cancelled":
-            raise ValueError("Appointment already cancelled.")
+        if appointment.member_id != member_id:
+            raise ValueError("You can only claim reimbursement for your own appointment")
 
 
-        return ReimbursementRepository.create(member_id, appointment_id, amount, description)
+        existing_claim = ReimbursementRepo.get_by_appointment_id(appointment_id)
+        if existing_claim:
+            raise ValueError("Reimbursement already requested for this appointment")
 
-    @staticmethod
-    def get_member_claims(member_id):
-        return ReimbursementRepository.get_by_member(member_id)
+        if appointment.status != "Canceled":
+            raise ValueError("Reimbursement can be requested only for canceled appointments")
 
-    @staticmethod
-    def get_all_claims():
-        return ReimbursementRepository.get_all()
+        return ReimbursementRepo.create(
+            member_id=member_id,
+            appointment_id=appointment_id,
+            amount=amount,
+            description=description,
+        )
 
     @staticmethod
-    def approve_claim(claim_id):
-        claim = ReimbursementRepository.update_status(claim_id, "Approved")
+    def review_claim(claim_id, status):
+        try:
+            status_enum = ClaimStatus[status]
+        except KeyError:
+            raise ValueError("Invalid status")
+
+        claim = ReimbursementRepo.get_by_id(claim_id)
         if not claim:
-            raise BadRequest("Claim not found.")
-        return claim
+            return None
+
+        if claim.status != ClaimStatus.PENDING:
+            raise ValueError("Claim has already been reviewed")
+
+        return ReimbursementRepo.update_status(claim_id, status_enum)
 
     @staticmethod
-    def reject_claim(claim_id):
-        claim = ReimbursementRepository.update_status(claim_id, "Rejected")
-        if not claim:
-            raise BadRequest("Claim not found.")
-        return claim
+    def get_claims():
+        return ReimbursementRepo.get_all()

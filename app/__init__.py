@@ -26,6 +26,7 @@ def create_app():
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
     app.config["JWT_ALGORITHM"] = os.getenv("JWT_ALGORITHM", "HS256")
     app.config["JWT_EXP_SECONDS"] = int(os.getenv("JWT_EXP_SECONDS", 86400))
+    
 
     db.init_app(app)
     ma.init_app(app)
@@ -38,5 +39,6 @@ def create_app():
     app.register_blueprint(admin_bp, url_prefix="/admin")
     app.register_blueprint(availability_bp, url_prefix="/availability")
     app.register_blueprint(appointment_bp, url_prefix="/appointments")
+    app.register_blueprint(reimbursement_bp, url_prefix="/reimbursement")
 
     return app
