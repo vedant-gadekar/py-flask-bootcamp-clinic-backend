@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity
 from sqlalchemy.exc import SQLAlchemyError
 from app.common.utils.decorators import feature_flag_required
-
+from app.common.models.user import RoleEnum
 
 from app.common.utils.decorators import requires_role
 from app.reimbursement.schemas.reimbursement_schema import (
@@ -15,7 +15,7 @@ reimbursement_bp = Blueprint("reimbursement", __name__, url_prefix="/reimburseme
 
 
 @reimbursement_bp.route("/submit", methods=["POST"])
-@requires_role("member")
+@requires_role(RoleEnum.MEMBER)
 @feature_flag_required("submit_claim")
 def submit_claim():
     try:
@@ -42,7 +42,7 @@ def submit_claim():
 
 
 @reimbursement_bp.route("/review/<int:claim_id>", methods=["PUT"])
-@requires_role("admin")
+@requires_role(RoleEnum.ADMIN)
 @feature_flag_required("review_claim")
 def review_claim(claim_id):
     try:
@@ -61,7 +61,7 @@ def review_claim(claim_id):
 
 
 @reimbursement_bp.route("/get_all_reimbursement", methods=["GET"])
-@requires_role("admin")
+@requires_role(RoleEnum.ADMIN)
 @feature_flag_required("view_all_claims")
 def get_all_claims():
     claims = ReimbursementService.get_claims()
