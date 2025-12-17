@@ -1,15 +1,17 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import get_jwt_identity
 from app.common.models.user import RoleEnum
-from app.common.utils.rbac_decorator import requires_role
+from app.common.utils.decorators import requires_role
 from app.doctor_availability.services.availablity_service import AvailabilityService
 from app.doctor_availability.schema.availability_schema import AvailabilitySchema
 from datetime import datetime
+from app.common.utils.decorators import feature_flag_required
 
 availability_bp = Blueprint("availability_bp", __name__)
 
 @availability_bp.route("", methods=["POST"])
 @requires_role(RoleEnum.DOCTOR)
+@feature_flag_required("create_availability")
 def add_availability():
     
     try:
@@ -32,6 +34,7 @@ def add_availability():
 
 @availability_bp.route("/list", methods=["GET"])
 @requires_role(RoleEnum.DOCTOR)
+@feature_flag_required("get_availability")
 def list_availability():
     doctor_id = get_jwt_identity()
 

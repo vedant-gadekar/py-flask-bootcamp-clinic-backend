@@ -5,6 +5,7 @@ from app.auth.services.auth_service import AuthService
 from app.common.models.user import RoleEnum
 from app.common.schemas.user_schema import UserSchema
 from marshmallow import ValidationError
+from app.common.utils.decorators import feature_flag_required
 
 auth_bp = Blueprint("auth", __name__)
 register_schema = RegisterSchema()
@@ -17,6 +18,7 @@ def auth_root():
     return {"message": "auth works"}
 
 @auth_bp.route("/register", methods=["POST"])
+@feature_flag_required("registration")
 def register():
     try:
         data = register_schema.load(request.get_json() or {})
@@ -33,7 +35,7 @@ def register():
     except ValueError as e:
         return jsonify({"message": str(e)}), 400
 
-    
+@feature_flag_required("login")
 @auth_bp.route("/login", methods=["POST"])
 def login():
     try:

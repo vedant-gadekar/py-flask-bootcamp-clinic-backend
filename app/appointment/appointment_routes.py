@@ -1,15 +1,17 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import get_jwt_identity
-from app.common.utils.rbac_decorator import requires_role
+from app.common.utils.decorators import requires_role
 from app.appointment.services.appointment_service import AppointmentService
 from app.appointment.schemas.appointment_schema import AppointmentSchema
 from app.common.models.user import RoleEnum
 from app.appointment.models.appointment import Appointment as appointment
+from app.common.utils.decorators import feature_flag_required
 
 appointment_bp = Blueprint("appointment_bp", __name__)
 
 @appointment_bp.route("/book", methods=["POST"])
 @requires_role(RoleEnum.MEMBER)
+@feature_flag_required("book_appointment")
 def book_appointment():
     raw_data = request.get_json()
     try:
@@ -31,6 +33,7 @@ def book_appointment():
 
 @appointment_bp.route("/my", methods=["GET"])
 @requires_role(RoleEnum.MEMBER)
+@feature_flag_required("list_member_appointments")
 def my_appointments():
     member_id = get_jwt_identity()
     try:
@@ -43,6 +46,7 @@ def my_appointments():
 
 @appointment_bp.route("/doctor", methods=["GET"])
 @requires_role(RoleEnum.DOCTOR)
+@feature_flag_required("list_doctor_appointments")
 def doctor_appointments():
     doctor_id = get_jwt_identity()
     try:
@@ -55,6 +59,7 @@ def doctor_appointments():
 
 @appointment_bp.route("/admin", methods=["GET"])
 @requires_role(RoleEnum.ADMIN)
+@feature_flag_required("view_appointments")
 def admin_appointments():
     try:
         appts = AppointmentService.admin_all_appointments()
@@ -64,6 +69,7 @@ def admin_appointments():
 
 @appointment_bp.route("/cancel", methods=["PUT"])
 @requires_role(RoleEnum.MEMBER)
+@feature_flag_required("cancel_appointment")
 def cancel_appointment():
     member_id = int(get_jwt_identity())
     data = request.get_json() or {}

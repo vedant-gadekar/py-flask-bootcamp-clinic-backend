@@ -2,11 +2,12 @@ from flask import Blueprint, request, jsonify, g
 from app.admin.services.department_services import DepartmentService
 from app.admin.services.doctor_services import DoctorService
 from app.common.models.user import RoleEnum
-from app.common.utils.rbac_decorator import requires_role
+from app.common.utils.decorators import requires_role
 from app.admin.schemas.department_schema import DepartmentSchema
 from app.admin.schemas.doctor_schema import OnboardDoctorSchema, DoctorSchema , AssignDoctorDepartmentSchema
 from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
+from app.common.utils.decorators import feature_flag_required
 
 
 admin_bp = Blueprint("admin", __name__)
@@ -22,8 +23,10 @@ doctor_schema = DoctorSchema()
 def admin_root():
     return {"message": "admin works"}
 
+
 @admin_bp.route("/departments", methods=["POST"])
 @requires_role(RoleEnum.ADMIN)
+@feature_flag_required("create_department")
 def create_department():
     try:
         data = department_schema_single.load(request.get_json() or {})
@@ -40,6 +43,7 @@ def create_department():
 
 @admin_bp.route("/departments", methods=["GET"])
 @requires_role(RoleEnum.ADMIN)
+@feature_flag_required("list_departments")
 def list_departments():
     departments = DepartmentService.list_departments()
     return department_schema_many.dump(departments), 200
@@ -47,6 +51,7 @@ def list_departments():
 
 @admin_bp.route("/doctors", methods=["POST"])
 @requires_role(RoleEnum.ADMIN)
+@feature_flag_required("create_doctor")
 def onboard_doctor():
     try:
         data = onboard_doctor_schema.load(request.get_json())
@@ -68,14 +73,17 @@ def onboard_doctor():
     except SQLAlchemyError:
         return jsonify({"message": "Something went wrong"}), 500
 
+
 @admin_bp.route("/doctors", methods=["GET"])
 @requires_role(RoleEnum.ADMIN)
+@feature_flag_required("list_doctors")
 def list_doctors():
     doctors = DoctorService.list_doctors()
     return doctor_schema.dump(doctors, many=True), 200
 
 @admin_bp.route("/doctors/assign-department", methods=["POST"])
 @requires_role(RoleEnum.ADMIN)
+@feature_flag_required("assign_doctor")
 def assign_doctor_to_department():
     try:
         data = assign_department_schema.load(request.get_json() or {})
